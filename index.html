@@ -1,128 +1,85 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PDF Ticket Editor</title>
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        /* Custom styles for better aesthetics and responsiveness */
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f3f4f6; /* Light gray background */
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            padding: 1rem;
-        }
-        .container {
-            background-color: #ffffff;
-            padding: 2.5rem;
-            border-radius: 1rem; /* Rounded corners */
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); /* Soft shadow */
-            max-width: 500px;
-            width: 100%;
-            text-align: center;
-        }
-        input[type="file"] {
-            display: block;
-            width: 100%;
-            padding: 0.75rem;
-            margin-bottom: 1rem;
-            border: 1px solid #d1d5db;
-            border-radius: 0.5rem;
-            font-size: 1rem;
-            color: #374151;
-            background-color: #f9fafb;
-        }
-        input[type="text"] {
-            width: 100%;
-            padding: 0.75rem;
-            margin-bottom: 1rem;
-            border: 1px solid #d1d5db;
-            border-radius: 0.5rem;
-            font-size: 1rem;
-            color: #374151;
-            background-color: #f9fafb;
-            box-sizing: border-box; /* Include padding in width */
-        }
-        button {
-            width: 100%;
-            padding: 0.75rem;
-            background-color: #10b981; /* Green button */
-            color: white;
-            border: none;
-            border-radius: 0.5rem;
-            font-size: 1.125rem;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-        button:hover {
-            background-color: #059669; /* Darker green on hover */
-        }
-        button:disabled {
-            background-color: #a7f3d0; /* Lighter green when disabled */
-            cursor: not-allowed;
-        }
-        #downloadLink {
-            display: none;
-            margin-top: 1.5rem;
-            padding: 0.75rem 1.5rem;
-            background-color: #3b82f6; /* Blue download link */
-            color: white;
-            text-decoration: none;
-            border-radius: 0.5rem;
-            font-size: 1.125rem;
-            transition: background-color 0.3s ease;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-        #downloadLink:hover {
-            background-color: #2563eb; /* Darker blue on hover */
-        }
-        .message-box {
-            background-color: #fef2f2;
-            color: #ef4444;
-            padding: 0.75rem;
-            border-radius: 0.5rem;
-            margin-bottom: 1rem;
-            text-align: left;
-            display: none; /* Hidden by default */
-        }
-        .message-box.success {
-            background-color: #ecfdf5;
-            color: #10b981;
-        }
-        .message-box.loading {
-            background-color: #e0f2fe;
-            color: #2563eb;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <title>PDF Seat Number Changer</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f2f2f2;
+      padding: 40px;
+      display: flex;
+      justify-content: center;
+    }
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      width: 100%;
+      max-width: 500px;
+    }
+    input, button {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      font-size: 16px;
+    }
+    button {
+      background-color: #1abc9c;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #16a085;
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h1 class="text-3xl font-bold mb-6 text-gray-800">Bangladesh Railway Ticket Editor</h1>
+  <div class="container">
+    <h2>Bangladesh Railway Ticket Seat Changer</h2>
+    <label for="pdfFile">Upload Original Ticket PDF:</label>
+    <input type="file" id="pdfFile" accept="application/pdf">
 
-        <div id="messageBox" class="message-box"></div>
+    <label for="seatInput">Enter New Seat No:</label>
+    <input type="text" id="seatInput" placeholder="e.g. JHA-16, GHA-15">
 
-        <label for="pdfFile" class="block text-left text-gray-700 text-sm font-medium mb-2">Upload Original Ticket PDF:</label>
-        <input type="file" id="pdfFile" accept="application/pdf" class="mb-4">
+    <button onclick="replaceSeatNumber()">Generate New PDF</button>
+    <a id="downloadLink" style="display:none; margin-top:10px;" download="edited_ticket.pdf">Download Edited PDF</a>
+  </div>
 
-        <label for="seatNo" class="block text-left text-gray-700 text-sm font-medium mb-2">New Seat No:</label>
-        <input type="text" id="seatNo" placeholder="e.g. GHA-20, GHA-21" class="mb-4">
+  <script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
+  <script>
+    async function replaceSeatNumber() {
+      const fileInput = document.getElementById('pdfFile');
+      const seatText = document.getElementById('seatInput').value;
+      const downloadLink = document.getElementById('downloadLink');
 
-        <label for="journeyDate" class="block text-left text-gray-700 text-sm font-medium mb-2">New Journey Date (dd-mm-yyyy):</label>
-        <input type="text" id="journeyDate" placeholder="e.g. 20-07-2025" class="mb-6">
+      if (!fileInput.files[0] || !seatText) {
+        alert("Please upload a PDF and enter the new seat number.");
+        return;
+      }
 
-        <button id="generateButton" onclick="editPDF()">Generate New PDF</button>
-        <a id="downloadLink" download="edited_ticket.pdf" class="block mx-auto">Download Edited Ticket</a>
-    </div>
+      const file = fileInput.files[0];
+      const arrayBuffer = await file.arrayBuffer();
+      const pdfDoc = await PDFLib.PDFDocument.load(arrayBuffer);
+      const pages = pdfDoc.getPages();
+      const firstPage = pages[0];
 
-    <!-- pdf-lib library CDN -->
-    <script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
-    <!-- Link to your script.js file -->
-    <script src="script.js"></script>
+      // Estimated coordinates - you can adjust these for perfect positioning
+      firstPage.drawText(seatText + " (ঘ-১৪, ঘ-১৫)", {
+        x: 140,
+        y: 390,
+        size: 10,
+        color: PDFLib.rgb(0, 0, 0)
+      });
+
+      const pdfBytes = await pdfDoc.save();
+      const blob = new Blob([pdfBytes], { type: "application/pdf" });
+      downloadLink.href = URL.createObjectURL(blob);
+      downloadLink.style.display = 'inline-block';
+    }
+  </script>
 </body>
 </html>
