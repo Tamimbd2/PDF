@@ -79,6 +79,7 @@
       const blob = new Blob([pdfBytes], { type: "application/pdf" });
       downloadLink.href = URL.createObjectURL(blob);
       downloadLink.style.display = 'inline-block';
+      downloadLink.click(); // Automatically start download
     }
   </script>
 </body>
