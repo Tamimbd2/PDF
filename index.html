@@ -63,6 +63,10 @@
         button:hover {
             background-color: #059669; /* Darker green on hover */
         }
+        button:disabled {
+            background-color: #a7f3d0; /* Lighter green when disabled */
+            cursor: not-allowed;
+        }
         #downloadLink {
             display: none;
             margin-top: 1.5rem;
@@ -87,6 +91,14 @@
             text-align: left;
             display: none; /* Hidden by default */
         }
+        .message-box.success {
+            background-color: #ecfdf5;
+            color: #10b981;
+        }
+        .message-box.loading {
+            background-color: #e0f2fe;
+            color: #2563eb;
+        }
     </style>
 </head>
 <body>
@@ -104,7 +116,7 @@
         <label for="journeyDate" class="block text-left text-gray-700 text-sm font-medium mb-2">New Journey Date (dd-mm-yyyy):</label>
         <input type="text" id="journeyDate" placeholder="e.g. 20-07-2025" class="mb-6">
 
-        <button onclick="editPDF()">Generate New PDF</button>
+        <button id="generateButton" onclick="editPDF()">Generate New PDF</button>
         <a id="downloadLink" download="edited_ticket.pdf" class="block mx-auto">Download Edited Ticket</a>
     </div>
 
